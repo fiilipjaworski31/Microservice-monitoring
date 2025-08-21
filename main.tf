@@ -47,15 +47,22 @@ resource "google_compute_instance" "vm_instance" {
   // Skrypt startowy instalujący Docker i Git
   metadata_startup_script = <<-EOT
         #!/bin/bash
-        # Czekaj na odblokowanie apt
+        # Daj systemowi 30 sekund na uruchomienie własnych usług
+        sleep 30
+        
+        # Czekaj na odblokowanie apt, aby uniknąć błędów
         while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do
+           echo "Czekam na zwolnienie blokady apt..."
            sleep 5
         done
+        
         # Ustawienie trybu non-interactive, aby uniknąć zawieszenia
         export DEBIAN_FRONTEND=noninteractive
-        # Aktualizacja i instalacja
+        
+        # Aktualizacja i instalacja wszystkich potrzebnych narzędzi
         apt-get update
         apt-get install -y docker.io git docker-compose-plugin
+        
         # Uruchomienie Dockera
         systemctl start docker
         systemctl enable docker

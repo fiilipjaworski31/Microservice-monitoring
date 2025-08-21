@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "google" {
-  project = "handy-math-425518-k9" //Tutaj ID mojego projektu
+  project = "handy-math-425518-k9" // ID mojego projektu
   region  = "europe-central2" // Warszawa
 }
 
@@ -26,10 +26,11 @@ resource "google_compute_firewall" "allow_http_ssh" {
   source_ranges = ["0.0.0.0/0"]
 }
 
-resource "google_compute_instance" "vm_instance" {
+resource "google_compute_instance" "vm_instance" { 
   name         = "devops-server"
   machine_type = "e2-micro"
   zone         = "europe-central2-a"
+  allow_stopping_for_update = true // Pozwala na zatrzymanie maszyny w celu aktualizacji
 
   boot_disk {
     initialize_params {
@@ -43,6 +44,11 @@ resource "google_compute_instance" "vm_instance" {
       // Pusty blok oznacza efemeryczny (tymczasowy) adres IP
     }
   }
+  service_account {
+        // Użyj domyślnego konta serwisowego i nadaj mu dostęp do API chmury.
+        // Dostęp ten będzie później ograniczony przez konkretne role w IAM.
+        scopes = ["cloud-platform"]
+      }
 
   // Skrypt startowy instalujący Docker i Git
   metadata_startup_script = <<-EOT
